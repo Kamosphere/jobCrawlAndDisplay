@@ -39,6 +39,9 @@ def display(request):
         if val in 'experience':
             experience = helper.getExperience()
             ctx['experience'] = experience
+        if val in 'companysize':
+            companysize = helper.getCompanysize()
+            ctx['companysize'] = companysize
     else:
         salary = helper.getSalary()
         ctx['salary'] = salary

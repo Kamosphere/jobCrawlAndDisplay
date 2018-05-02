@@ -28,6 +28,13 @@ if (typeof (experience) != "undefined"){
     $("#display").ready(function(){delete experience;});
 }
 
+if (typeof (companysize) != "undefined"){
+    var title = "公司规模分布";
+    var desc = ['1-99', '100-499',  '500-999', '1000-9999', '10000+', '保密'];
+    showRose(title, desc, companysize);
+    $("#display").ready(function(){delete companysize;});
+}
+
 if (typeof (citys) != "undefined"){
     showChinaMap();
     $("#display").ready(function(){delete citys;});

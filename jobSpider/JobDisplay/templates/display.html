@@ -47,6 +47,7 @@
 					    <option value="education">学历分布</option>
                         <option value="citys">求职地区热度</option>
 					    <option value="experience">经验要求</option>
+					    <option value="companysize">公司规模分布</option>
                 </select>
             </form>
         </div>
@@ -85,6 +86,9 @@
     {% endif %}
     {% if experience %}
          var experience = {{ experience | safe }};
+    {% endif %}
+    {% if companysize %}
+         var companysize = {{ companysize | safe }};
     {% endif %}
 </script>
 	

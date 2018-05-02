@@ -97,6 +97,16 @@ class SqlHelper(object):
             lc.append({"value": self.tupleToOther(executeEdu(i)), "name": i})
         return lc
 
+    #公司规模查询情况
+    def executeGroupCompanySize(self, args):
+        def executeEdu(arg):
+             sql = "select count(jobname) from app_hireinfo where company_size like '%%%s%%'" % arg
+             return self.executeSql(sql)
+        lc = []
+        for i in args:
+            lc.append({"value": self.tupleToOther(executeEdu(i)), "name": i})
+        return lc
+
 class BaseOnSqlHelper(object):
     # 配置你想要获取的信息
     def __init__(self):
@@ -113,6 +123,7 @@ class BaseOnSqlHelper(object):
                          ]
         self.education = ['不限', '大专',  '本科', '硕士', '博士']
         self.experience = [[1, 3], [3, 5], [5, 8], [8, 10], ['不限']]
+        self.companysize = ['1-99', '100-499', '500-999', '1000-9999', '10000+', '保密']
     # 二维元祖转换列表
     def tuple_to_list(self, tuples):
         ls = []
@@ -145,6 +156,10 @@ class BaseOnSqlHelper(object):
     def getExperience(self):
         return self.sqlHelper.executeGroupYear(self.experience)
 
+    # 拿到公司规模
+    def getCompanysize(self):
+        return self.sqlHelper.executeGroupCompanySize(self.companysize)
+
     # 二维元祖转换为字典列表
     def tuple_dict_list(self, tuples):
         ls = []
@@ -154,6 +169,7 @@ class BaseOnSqlHelper(object):
             ls.append({keys[0]:tuple[0],keys[1]:tuple[1],keys[2]:tuple[2],keys[3]:tuple[3]
                           ,keys[4]:tuple[4],keys[5]:tuple[5],keys[6]:tuple[6],keys[7]:tuple[7]})
         return ls
+
     # 搜索函数
     def getSearchData(self, key):
         # 一次查询限制返回100条
@@ -169,7 +185,6 @@ class BaseOnSqlHelper(object):
         for i in range(len(app_citys)):
             la.append({'name' : app_citys[i], 'value' : ll[i]})
         return la
-
 
     # 不同语言在各个城市之间的需求
     def getLanEachOfCity(self, key, app_citys):

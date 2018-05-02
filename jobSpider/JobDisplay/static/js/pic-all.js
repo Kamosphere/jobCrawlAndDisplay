@@ -220,6 +220,51 @@ function showRing(title, desc, data){
 	});
 }
 
+//南丁格尔玫瑰图
+function showRose(title, desc, data){
+	$(document).ready(function(){
+		var myChart = echarts.init(document.getElementById('display'));
+		option = {
+			title : {
+				text: title,
+				x:'center'
+			},
+			tooltip : {
+				trigger: 'item',
+				formatter: "{a} <br/>{b} : {c} ({d}%)"
+			},
+			legend: {
+                x : 'center',
+                y : 'bottom',
+				data: desc,
+			},
+			toolbox: {
+                 show : true,
+                 feature : {
+                    mark : {show: true},
+                    dataView : {show: true, readOnly: false},
+                    magicType : {
+                        show: true,
+                        type: ['pie', 'funnel']
+                    },
+                    saveAsImage : {show: true}
+                 }
+            },
+            calculable : true,
+			series : [
+				{
+					name: '人数',
+					type: 'pie',
+                    radius : ['40%', '80%'],
+                    roseType : 'area',
+					data: data,
+				}
+			]
+		};
+		myChart.setOption(option);
+	});
+}
+
 //柱状图
 function showBar(){
 	$(document).ready(function(){
@@ -232,8 +277,8 @@ function showBar(){
 			color: ['#3398DB'],
 			tooltip : {
 				trigger: 'axis',
-				axisPointer : {            // 坐标轴指示器，坐标轴触发有效
-					type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+				axisPointer : {
+					type : 'shadow'
 				}
 			},
 			legend: {
@@ -299,7 +344,7 @@ function showWordle(){
             series: [{
                 type: 'wordCloud',
                 gridSize: 20,
-                sizeRange: [12, 50],
+                sizeRange: [20, 100],
                 rotationRange: [0, 0],
                 shape: 'circle',
                 textStyle: {

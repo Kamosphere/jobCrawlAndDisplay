@@ -22,9 +22,31 @@ class TransFormItemPipeline(object):
         return item
 
     def transForm(self, item):
-        if '不限' in item['education']:
+        if '大专' in item['education']:
+            item['education'] = '大专'
+        elif '本科' in item['education']:
+            item['education'] = '本科'
+        elif '硕士' in item['education']:
+            item['education'] = '硕士'
+        elif '博士' in item['education']:
+            item['education'] = '博士'
+        else:
             item['education'] = '不限'
 
+        if '少于50人' in item['company_size']\
+                or '50-150人' in item['company_size']:
+            item['company_size'] = '1-99'
+        elif '150-500人' in item['company_size']:
+            item['company_size'] = '100-499'
+        elif '500-1000人' in item['company_size']:
+            item['company_size'] = '500-999'
+        elif '1000-5000人' in item['company_size']\
+                or '5000-10000人' in item['company_size']:
+            item['company_size'] = '1000-9999'
+        elif '10000人以上' in item['company_size']:
+            item['company_size'] = '10000+'
+        else:
+            item['company_size'] = '保密'
 
         pattern = re.compile('\d+')
         findyear = pattern.search(item['experience'])
