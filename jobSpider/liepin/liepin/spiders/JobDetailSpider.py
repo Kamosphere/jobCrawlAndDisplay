@@ -19,7 +19,8 @@ class JobDetailSpider(scrapy.Spider):
     allowed_domains = ['liepin.com']
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
     }
 
     def start_requests(self):
@@ -78,7 +79,8 @@ class JobDetailSpider(scrapy.Spider):
                     "/html/body/div[@id='job-hunter']/div[@class='wrap clearfix']/div[@class='clearfix content']/div[@class='main']/div[@class='about-position']/div[@class='title']/div[@class='title-info ']/h1/text()").extract_first()
             item['jobname'] = jobnameraw.strip()
             item['salary'] = response.xpath(
-                "/html/body/div[@id='job-hunter']//p[@class='job-main-title']/text()").extract_first().strip()
+                "/html/body/div[@id='job-hunter']//"
+                "p[@class='job-main-title']/text()").extract_first().strip()
             item['education'] = response.xpath(
                 "/html/body/div[@id='job-hunter']//div[@class='resume clearfix']/span[1]/text()").extract_first().strip()
             item['experience'] = response.xpath(

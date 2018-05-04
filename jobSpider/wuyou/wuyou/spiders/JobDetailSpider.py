@@ -22,10 +22,12 @@ def clean_char(s):
     s = s.replace(' ', '')
     return s
 
+
 class JobDetailSpider(scrapy.Spider):
     name = 'wuyou'
     allowed_domains = ['51job.com']
     start_urls = ['http://search.51job.com/jobsearch/search_result.php?fromJs=1&keyword= %s &keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9' % keyword]
+
     def parse(self, response):
         items = []
         # 选取每一个页面的职位信息
@@ -59,8 +61,7 @@ class JobDetailSpider(scrapy.Spider):
             # 发送下一页请求
             yield scrapy.Request(url=url, callback=self.parse)
 
-
-    #获取职位详情和公司详情函数
+    # 获取职位详情和公司详情函数
     def parse_position(self,response):
         item = response.meta['position']
         zhize_unit = response.css("div.tCompany_main > div:nth-child(2) > div")

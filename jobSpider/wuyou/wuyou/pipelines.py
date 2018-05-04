@@ -57,7 +57,8 @@ class TransFormItemPipeline(object):
 
         idline = (item['jobname'] + item['company_name']).encode()
         item['id'] = hashlib.sha256(idline).hexdigest()
-        temp=item['salary']
+
+        temp = item['salary']
         if temp.endswith('万/月'):
             arr1=stringProcess(temp,'万/月')
             item['salary_min'] = round(float(arr1[0]) * 12, 2)
@@ -78,7 +79,8 @@ class TransFormItemPipeline(object):
             item['salary_min'] = 0
             item['salary_max'] = 0
 
-        item['salary']=round(float(item['salary_min'])+((float(item['salary_max']))-(float(item['salary_min']))*0.5))
+        item['salary'] = round(float(item['salary_min'])+((float(item['salary_max']))-(float(item['salary_min']))*0.5))
+
 
 class WuyouPipeline(object):
     def __init__(self, ):
@@ -96,9 +98,12 @@ class WuyouPipeline(object):
         return item
 
     def insertData(self, item):
-        sql = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,company_size,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-        params = (
-        item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
-        item['address'],item['experience'], item['company_size'], item['education'], item['salary_min'], item['salary_max'])
-        self.cursor.execute(sql, params)
+        sql1 = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        params1 = (
+           item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
+           item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'])
+        self.cursor.execute(sql1, params1)
+        sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
+        params2 = (item['company_name'], item['company_size'])
+        self.cursor.execute(sql2, params2)
         self.conn.commit()

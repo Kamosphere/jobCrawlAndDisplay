@@ -14,8 +14,10 @@ class hireinfo(models.Model):
     address = models.CharField(max_length=20)  # 工作地点
     experience = models.CharField(max_length=20) # 工作经验
     education = models.CharField(max_length=20)  # 学历
-    company_size = models.CharField(max_length=20)  # 公司规模
     job_require = models.CharField(max_length=1024)  # 工作描述
 
 
+class companyinfo(models.Model):
+    company_name = models.CharField(primary_key=True, max_length=100)  # 公司
+    company_size = models.CharField(max_length=20)  # 公司规模
 

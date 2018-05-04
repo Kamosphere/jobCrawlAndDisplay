@@ -12,9 +12,21 @@ from .handlesql import BaseOnSqlHelper
 
 helper = BaseOnSqlHelper()
 
+
+def urlreplace(inputkey):
+    keyword = inputkey
+    keyword = keyword.replace('+', '%2B')
+    keyword = keyword.replace('#', '%23')
+    keyword = keyword.replace('?', '%3F')
+    keyword = keyword.replace('&', '%26')
+    keyword = keyword.replace('=', '%3D')
+    return keyword
+
+
 def index(request):
     ctx = {}
     return render(request, 'index.html', ctx)
+
 
 @csrf_exempt
 def display(request):
@@ -47,18 +59,20 @@ def display(request):
         ctx['salary'] = salary
     return render(request, 'display.html', ctx)
 
+
 def about(request):
     ctx = {}
     return render(request, 'about.html', ctx)
 
+
 def search(request):
-    limit = 10        #每页显示的记录数
+    limit = 10        # 每页显示的记录数
     ctx = {}
     if request.GET.get('search'):
-        search = request.GET.get('search')
-        paginator = Paginator(helper.getSearchData(search), limit)
+        keyword = request.GET.get('search')
     else:
-        paginator = Paginator(helper.getSearchData('java'), limit)
+        keyword = 'java'
+    paginator = Paginator(helper.getSearchData(keyword), limit)
     page = request.GET.get('page')
     try:
         result = paginator.page(page)
@@ -67,7 +81,9 @@ def search(request):
     except EmptyPage:
         result = paginator.page(paginator.num_pages)
     ctx['result'] = result
+    ctx['keyword'] = urlreplace(keyword)
     return render(request, 'search.html', ctx)
+
 
 def analyse(request):
     ctx = {}
@@ -107,14 +123,14 @@ def analyse(request):
 
     if request.GET.get('search'):
         search = request.GET.get('search')
-        heat_lan,best_city, value = helper.getLanEachOfCity(search, citys)
+        heat_lan, best_city, value = helper.getLanEachOfCity(search, citys)
         ctx['heat_lan'] = heat_lan
         ctx['best_city'] = best_city
         ctx['title'] = json.dumps(search)
         ctx['analyse'] = value
     else:
         search = 'java'
-        heat_lan,best_city,value = helper.getLanEachOfCity(search, citys)
+        heat_lan, best_city, value = helper.getLanEachOfCity(search, citys)
         ctx['heat_lan'] = heat_lan
         ctx['title'] = json.dumps(search)
         ctx['best_city'] = best_city

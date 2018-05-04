@@ -1,5 +1,5 @@
 import os
-dirs=os.getcwd()
+dirs = os.getcwd()
 os.chdir(dirs+"\liepin")
 os.system("scrapy crawl liepin -s CLOSESPIDER_TIMEOUT=60")
 

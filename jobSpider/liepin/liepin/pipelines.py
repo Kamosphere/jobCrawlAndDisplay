@@ -25,7 +25,7 @@ class HtmlTagRemovePipeline(object):
 
 
 class TransFormItemPipeline(object):
-    def process_item(self, item, spdider):
+    def process_item(self, item, spider):
         self.transForm(item)
         return item
 
@@ -40,22 +40,6 @@ class TransFormItemPipeline(object):
             item['education'] = '博士'
         else:
             item['education'] = '不限'
-
-        if '1-49人' in item['company_size']\
-                or '50-99人' in item['company_size']:
-            item['company_size'] = '1-99'
-        elif '100-499人' in item['company_size']:
-            item['company_size'] = '100-499'
-        elif '500-999人' in item['company_size']:
-            item['company_size'] = '500-999'
-        elif '1000-2000人' in item['company_size']\
-                or '2000-5000人' in item['company_size']\
-                or '5000-10000人' in item['company_size']:
-            item['company_size'] = '1000-9999'
-        elif '10000人以上' in item['company_size']:
-            item['company_size'] = '10000+'
-        else:
-            item['company_size'] = '保密'
 
         pattern = re.compile('\d+')
         findyear = pattern.search(item['experience'])
@@ -80,9 +64,24 @@ class TransFormItemPipeline(object):
             float(item['salary_min']) + ((float(item['salary_max'])) - (float(item['salary_min'])) * 0.5))
 
         gm_str = item['company_size']
-        gm_list=re.split('：', gm_str)
+        gm_list = re.split('：', gm_str)
         if len(gm_list) > 1:
             item['company_size'] = gm_list[1]
+        if '1-49人' in item['company_size']\
+                or '50-99人' in item['company_size']:
+            item['company_size'] = '1-99'
+        elif '100-499人' in item['company_size']:
+            item['company_size'] = '100-499'
+        elif '500-999人' in item['company_size']:
+            item['company_size'] = '500-999'
+        elif '1000-2000人' in item['company_size']\
+                or '2000-5000人' in item['company_size']\
+                or '5000-10000人' in item['company_size']:
+            item['company_size'] = '1000-9999'
+        elif '10000人以上' in item['company_size']:
+            item['company_size'] = '10000+'
+        else:
+            item['company_size'] = '保密'
 
 
 class LiepinPipeline(object):
@@ -101,9 +100,12 @@ class LiepinPipeline(object):
         return item
 
     def insertData(self, item):
-        sql = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,company_size,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-        params = (
-        item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
-        item['address'],item['experience'], item['company_size'], item['education'], item['salary_min'], item['salary_max'])
-        self.cursor.execute(sql, params)
+        sql1 = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        params1 = (
+            item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
+            item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'])
+        self.cursor.execute(sql1, params1)
+        sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
+        params2 = (item['company_name'], item['company_size'])
+        self.cursor.execute(sql2, params2)
         self.conn.commit()

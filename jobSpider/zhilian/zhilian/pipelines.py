@@ -42,14 +42,15 @@ class TransFormItemPipeline(object):
             item['company_size'] = '保密'
 
         pattern = re.compile('\d+')
-        findyear=pattern.search(item['experience'])
+        findyear = pattern.search(item['experience'])
         if findyear:
-            item['experience']=findyear.group()
+            item['experience'] = findyear.group()
         else:
-            item['experience']='不限'
+            item['experience'] = '不限'
 
         idline = (item['jobname'] + item['company_name']).encode()
         item['id'] = hashlib.sha256(idline).hexdigest()
+
         ptn_str = u'(\d+)-(\d+)'
         ptn = re.compile(ptn_str)
         if ptn.match(item['salary']):
@@ -79,10 +80,13 @@ class ZhilianPipeline(object):
         return item
 
     def insertData(self, item):
-        sql = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,company_size,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-        params = (
-        item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
-        item['address'],item['experience'], item['company_size'], item['education'], item['salary_min'], item['salary_max'])
-        self.cursor.execute(sql, params)
+        sql1 = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        params1 = (
+            item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
+            item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'])
+        self.cursor.execute(sql1, params1)
+        sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
+        params2 = (item['company_name'], item['company_size'])
+        self.cursor.execute(sql2, params2)
         self.conn.commit()
 

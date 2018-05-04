@@ -48,13 +48,13 @@
 					</form>
                     <div class="tags">
 						    <span>热门搜索：</span>
-                            <a class=" active" href="#">iOS</a>
-                            <a class="" href="#">Android</a>
-                            <a class="" href="#">PHP</a>
-                            <a class="" href="#">Web前端</a>
-                            <a class="" href="#">产品经理</a>
-                            <a class="" href="#">运营</a>
-                            <a class="" href="#">视觉设计</a>
+                            <a class=" active" href="?search=ios">iOS</a>
+                            <a class="" href="?search=android">Android</a>
+                            <a class="" href="?search=PHP">PHP</a>
+                            <a class="" href="?search=web">Web</a>
+                            <a class="" href="?search=c%2B%2B">c++</a>
+                            <a class="" href="?search=python">python</a>
+						    <a class="" href="?search=java">java</a>
 					</div>
 				</div>
 				<div class="clearfix">
@@ -102,18 +102,18 @@
 					  <ul class="pagination">
 					    <li class="disabled">
                            {% if result.has_previous %}
-                                <a class='paginator'  aria-label="Previous" title='上一页' href='?page={{ result.previous_page_number }}'><span aria-hidden="true">&lt;&lt;</span></a>
+                                <a class='paginator'  aria-label="Previous" title='上一页' href='?search={{ keyword | safe }}&page={{ result.previous_page_number }}'><span aria-hidden="true">&lt;&lt;</span></a>
                            {% endif %}
 					    </li>
                      {% for page in result.paginator.page_range %}
                         {% if page == result.number %}
                              <li class="active"><a class='paginator_current' title='当前页:{{ page }}'><span>{{ page }}</span></a></li>
                         {% else %}
-                             <li><a class='paginator' href='?page={{ page }}' title='{{ page }}'><span>{{ page }}</span></a></li>
+                             <li><a class='paginator' href='?search={{ keyword | safe }}&page={{ page }}' title='{{ page }}'><span>{{ page }}</span></a></li>
                         {% endif %}
                     {% endfor %}
 					{% if result.has_next %}
-                         <li><a class='paginator'  aria-label="Next" title='下一页' href='?page={{ result.next_page_number }}'><span aria-hidden="true">&gt;&gt;</span></a></li>
+                         <li><a class='paginator'  aria-label="Next" title='下一页' href='?search={{ keyword | safe }}&page={{ result.next_page_number }}'><span aria-hidden="true">&gt;&gt;</span></a></li>
                     {% endif %}
 					  </ul>
 					</nav>
