@@ -2,8 +2,9 @@
 from django.db import models
 
 
-# 招聘
+# 工作信息
 class hireinfo(models.Model):
+    objects = models.Manager()
     id = models.CharField(primary_key=True, max_length=100)  # id
     link = models.CharField(max_length=100)  # 网址
     jobname = models.CharField(max_length=50)  # 工作
@@ -17,7 +18,9 @@ class hireinfo(models.Model):
     job_require = models.CharField(max_length=1024)  # 工作描述
 
 
+# 公司信息
 class companyinfo(models.Model):
+    objects = models.Manager()
     company_name = models.CharField(primary_key=True, max_length=100)  # 公司
     company_size = models.CharField(max_length=20)  # 公司规模
 

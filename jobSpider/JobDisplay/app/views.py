@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
@@ -13,8 +11,9 @@ from .handlesql import BaseOnSqlHelper
 helper = BaseOnSqlHelper()
 
 
-def urlreplace(inputkey):
-    keyword = inputkey
+# 转换不能传输到html中的字符
+def urlreplace(input_key):
+    keyword = input_key
     keyword = keyword.replace('+', '%2B')
     keyword = keyword.replace('#', '%23')
     keyword = keyword.replace('?', '%3F')
@@ -122,17 +121,13 @@ def analyse(request):
         citys.append(u'长春')
 
     if request.GET.get('search'):
-        search = request.GET.get('search')
-        heat_lan, best_city, value = helper.getLanEachOfCity(search, citys)
-        ctx['heat_lan'] = heat_lan
-        ctx['best_city'] = best_city
-        ctx['title'] = json.dumps(search)
-        ctx['analyse'] = value
+        search_key = request.GET.get('search')
     else:
-        search = 'java'
-        heat_lan, best_city, value = helper.getLanEachOfCity(search, citys)
-        ctx['heat_lan'] = heat_lan
-        ctx['title'] = json.dumps(search)
-        ctx['best_city'] = best_city
-        ctx['analyse'] = value
+        search_key = 'java'
+
+    heat_lan, best_city, value = helper.getLanEachOfCity(search_key, citys)
+    ctx['heat_lan'] = heat_lan
+    ctx['title'] = json.dumps(search_key)
+    ctx['best_city'] = best_city
+    ctx['analyse'] = value
     return render(request, 'analyse.html', ctx)

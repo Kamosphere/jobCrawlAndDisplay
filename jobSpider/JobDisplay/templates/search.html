@@ -39,7 +39,7 @@
 	<div class="page jobs">
 		<div class="container">
 			<div class="content">
-				<div class="search-box">
+				<div class="col-sm-10 search-box">
 					<form class="search"  type="GET" action="/search/">
 						<button class="btn btn-default" style="margin:0px;padding:0px;" type="submit" >搜索</button>
 						<div class="form-group">
@@ -57,9 +57,9 @@
 						    <a class="" href="?search=java">java</a>
 					</div>
 				</div>
-				<div class="clearfix">
+				<div class="col-sm-10 clearfix">
 					 {% for note in result %}
-                       <div class="job-rampage-item" >
+                       <div class="col-sm-10 job-rampage-item" >
 						<h3 >
 							<a href=  {{ note.link }} target="_blank" >{{ note.jobname }}</a>
 						</h3>
@@ -97,7 +97,7 @@
                   {% endfor %}
                 </div>
             <div class="row">
-				<div class="col-md-12 text-center animate-box" data-animate-effect="fadeIn">
+				<div class="col-sm-10 text-center animate-box" data-animate-effect="fadeIn">
 					<nav>
 					  <ul class="pagination">
 					    <li class="disabled">
@@ -123,10 +123,9 @@
 		</div>
 	</div>
 
-
 	<footer id="yunhai-footer" role="contentinfo">
 		<div class="container">
-			<div class="col-md-12 yunhai-copyright text-center">
+			<div class="col-sm-10 yunhai-copyright text-center">
 				<p>&copy; 2018 Kamosphere All Rights Reserved. <span>Designed with</span> <i class="icon-heart"></i> by <a href="#/" target="_blank">Kamosphere</a> </p>
 			</div>
 
