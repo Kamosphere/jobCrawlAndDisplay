@@ -5,6 +5,14 @@ import json
 import re
 
 
+def fileInput(filename):
+    myfile = open(filename)
+    lines = len(myfile.readlines())
+    dicts = {}
+    for line in myfile:
+        dicts[line] = "0"*(len(dicts))+"1"+"0"*(lines-len(dicts))
+    return dicts
+
 # sql与django ORM混用
 class SqlHelper(object):
     # 元组向其他类型转换
@@ -23,7 +31,7 @@ class SqlHelper(object):
 
     # 查询salary情况，返回相关结果
     def executeGroupSalary(self, args_list):
-        # flag = 0（有上限有下限） flag=1(上限) flag=2(下限 ) flag=3(面议)
+        # flag = 0（有上限有下限） flag=1(上限) flag=2(下限) flag=3(面议)
         def execute_salary(flag, args):
             if len(args) > 4 or len(args) < 0:
                 return None

@@ -20,10 +20,11 @@ class JobDetailSpider(Spider):
     start_urls = ['http://www.zhaopin.com/']
 
     def start_requests(self):
-        first_url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%80%89%E6%8B%A9%E5%9C%B0%E5%8C%BA&kw= %wtf &p='.replace('%wtf', keyword)
-        last_url = '&isadv=0'
+        first_url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%80%89%E6%8B%A9%E5%9C%B0%E5%8C%BA' \
+                    '&kw= %wtf '.replace('%wtf', keyword)
+        last_url = '&sm=0&isfilter=0&fl=489&isadv=0&sb=1&p='
         for i in range(1, 100):
-            url = first_url + str(i) + last_url
+            url = first_url + last_url + str(i)
             yield Request(url, self.parse)
 
     def parse(self, response):

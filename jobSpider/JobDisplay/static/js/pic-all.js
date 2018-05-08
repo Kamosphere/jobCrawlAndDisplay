@@ -13,7 +13,6 @@ function showChinaMap(){
 				'石家庄':[114.48,38.03], '合肥':[117.27,31.86], '长沙':[113,28.21], '西安':[108.95,34.27],
 				'沈阳':[123.38,41.8], '海口':[110.35,20.02], '贵阳':[106.71,26.57],'拉萨':[91.11,29.97],
 			};
-
 			var convertData = function (data) {
 				var res = [];
 				for (var i = 0; i < data.length; i++) {
@@ -27,7 +26,6 @@ function showChinaMap(){
 				}
 				return res;
 			};
-
 			option = {
 				backgroundColor: '#404a59',
 				title: {
@@ -74,7 +72,7 @@ function showChinaMap(){
 						coordinateSystem: 'geo',
 						data: convertData(data),
 						symbolSize: function (val) {
-							return val[2] /10;
+							return val[2] /100;
 						},
 						label: {
 							normal: {
@@ -125,8 +123,6 @@ function showChinaMap(){
 					}
 				]
 			};
-
-
 			myChart.setOption(option);
 	});
 }
@@ -269,7 +265,6 @@ function showRose(title, desc, data){
 function showBar(){
 	$(document).ready(function(){
 		var myChart = echarts.init(document.getElementById('display'));
-
 		option = {
 			title: {
 				text: '工资分布图'
@@ -324,11 +319,8 @@ function showBar(){
 				}
 			]
 		};
-
-
 		 myChart.setOption(option);
 	});
-
 }
 
 //词云图
@@ -367,9 +359,7 @@ function showWordle(){
         };
         myChart.setOption(option);
 	});
-
 }
-
 
 //不同工作在个地区的热度图
 function showHeat(){
@@ -386,7 +376,6 @@ function showHeat(){
 				'石家庄':[114.48,38.03], '合肥':[117.27,31.86], '长沙':[113,28.21], '西安':[108.95,34.27],
 				'沈阳':[123.38,41.8], '海口':[110.35,20.02], '贵阳':[106.71,26.57],'拉萨':[91.11,29.97],
 			};
-
 			var convertData = function (data) {
 				var res = [];
 				for (var i = 0; i < data.length; i++) {
@@ -400,7 +389,6 @@ function showHeat(){
 				}
 				return res;
 			};
-
 			option = {
 				backgroundColor: '#404a59',
 				title: {
@@ -447,7 +435,7 @@ function showHeat(){
 						coordinateSystem: 'geo',
 						data: convertData(data),
 						symbolSize: function (val) {
-							return val[2] /2;
+							return val[2] /3;
 						},
 						label: {
 							normal: {
@@ -473,7 +461,7 @@ function showHeat(){
 							return b.value - a.value;
 						}).slice(0, 5)),
 						symbolSize: function (val) {
-							return val[2]/2 ;
+							return val[2]/3 ;
 						},
 						showEffectOn: 'render',
 						rippleEffect: {
@@ -498,8 +486,6 @@ function showHeat(){
 					}
 				]
 			};
-
-
 			myChart.setOption(option);
 	});
 }

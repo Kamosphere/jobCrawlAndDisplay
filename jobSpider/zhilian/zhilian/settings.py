@@ -32,6 +32,8 @@ MYSQL_USER = 'root'         # 数据库用户
 MYSQL_PASSWORD = '123456'   # 数据库密码
 
 LOG_FILE = "scrapy.log"
+
+CONCURRENT_REQUESTS = 32
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 

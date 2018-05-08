@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.core.paginator import PageNotAnInteger
 from django.core.paginator import EmptyPage
+from django.views.decorators.cache import cache_page
 import json
 from .handlesql import BaseOnSqlHelper
 # Create your views here.
@@ -57,11 +58,6 @@ def display(request):
         salary = helper.getSalary()
         ctx['salary'] = salary
     return render(request, 'display.html', ctx)
-
-
-def about(request):
-    ctx = {}
-    return render(request, 'about.html', ctx)
 
 
 def search(request):

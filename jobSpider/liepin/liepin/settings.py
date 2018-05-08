@@ -79,6 +79,8 @@ MYSQL_USER = 'root'         # 数据库用户
 MYSQL_PASSWORD = '123456'   # 数据库密码
 
 LOG_FILE = "scrapy.log"
+
+CONCURRENT_REQUESTS = 32
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
