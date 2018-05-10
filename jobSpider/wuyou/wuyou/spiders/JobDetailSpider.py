@@ -43,7 +43,7 @@ class JobDetailSpider(scrapy.Spider):
             if len(money) == 0:
                 money = ["null"]
 
-            item['jobname'] = jobtitle[0].strip()
+            item['job_name'] = jobtitle[0].strip()
             item['link'] = link[0]
             item['company_name'] = company[0]
             item['address'] = location[0]

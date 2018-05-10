@@ -11,7 +11,9 @@ from liepin import settings
 import re
 import pymysql
 import hashlib
-
+import os
+fp_keyword = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../keyword.txt')
+fp_skill = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../skill.txt')
 
 class HtmlTagRemovePipeline(object):
     def process_item(self, item, spider):
@@ -25,11 +27,32 @@ class HtmlTagRemovePipeline(object):
 
 
 class TransFormItemPipeline(object):
+    def fileInput(self, filenames):
+        myfile = open(filenames)
+        filelines = myfile.readlines()
+        lines = len(filelines)
+        dicts = {}
+        for line in filelines:
+            line = line.strip('\n')
+            dicts[line] = '0' * (len(dicts)) + '1' + '0' * (lines - 1 - len(dicts))
+        return dicts
+
+    def __init__(self, ):
+        self.dict_keyword = self.fileInput(fp_keyword)
+        self.dict_skill = self.fileInput(fp_skill)
+
     def process_item(self, item, spider):
-        self.transForm(item)
+        self.transform_education(item)
+        self.transform_experience(item)
+        self.transfrom_id(item)
+        self.transfrom_salary(item)
+        self.transform_companysize(item)
+        self.transform_education(item)
+        self.transform_dictdata(item, self.dict_keyword, 1)
+        self.transform_dictdata(item, self.dict_skill, 2)
         return item
 
-    def transForm(self, item):
+    def transform_education(self, item):
         if '大专' in item['education']:
             item['education'] = '大专'
         elif '本科' in item['education']:
@@ -41,6 +64,7 @@ class TransFormItemPipeline(object):
         else:
             item['education'] = '不限'
 
+    def transform_experience(self, item):
         pattern = re.compile('\d+')
         findyear = pattern.search(item['experience'])
         if findyear:
@@ -48,9 +72,11 @@ class TransFormItemPipeline(object):
         else:
             item['experience'] = '不限'
 
-        idline = (item['jobname'] + item['company_name']).encode()
+    def transfrom_id(self, item):
+        idline = (item['job_name'] + item['company_name']).encode()
         item['id'] = hashlib.sha256(idline).hexdigest()
 
+    def transfrom_salary(self, item):
         ptn_str = u'(\d+)-(\d+)万'
         ptn = re.compile(ptn_str)
         if ptn.match(item['salary']):
@@ -63,6 +89,7 @@ class TransFormItemPipeline(object):
         item['salary'] = round(
             float(item['salary_min']) + ((float(item['salary_max'])) - (float(item['salary_min'])) * 0.5))
 
+    def transform_companysize(self, item):
         gm_str = item['company_size']
         gm_list = re.split('：', gm_str)
         if len(gm_list) > 1:
@@ -83,6 +110,17 @@ class TransFormItemPipeline(object):
         else:
             item['company_size'] = '保密'
 
+    def transform_dictdata(self, item, dicts, flag):
+        binput = 0
+        for key, value in dicts.items():
+            if key in item['job_require']:
+                binput = binput | int(value, 2)
+        boutput = str(bin(binput)[2:])
+        if flag == 1:
+            item['job_require_keyword'] = boutput
+        elif flag == 2:
+            item['job_require_skill'] = boutput
+
 
 class LiepinPipeline(object):
     def __init__(self, ):
@@ -100,10 +138,13 @@ class LiepinPipeline(object):
         return item
 
     def insertData(self, item):
-        sql1 = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        sql1 = "insert into app_hireinfo(id,link,job_name,salary,company_name,job_require,address," \
+               "experience,education,salary_min,salary_max,job_require_keyword,job_require_skill) " \
+               "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
         params1 = (
-            item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
-            item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'])
+            item['id'], item['link'], item['job_name'], item['salary'], item['company_name'], item['job_require'],
+            item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'],
+            item['job_require_keyword'], item['job_require_skill'])
         self.cursor.execute(sql1, params1)
         sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
         params2 = (item['company_name'], item['company_size'])

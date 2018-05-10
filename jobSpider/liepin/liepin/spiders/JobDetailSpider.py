@@ -51,7 +51,7 @@ class JobDetailSpider(scrapy.Spider):
             listlink = response.xpath(
                 "//link[@rel='canonical']/@href").extract()
             item['link'] = "".join(listlink).strip()
-            item['jobname'] = response.xpath(
+            item['job_name'] = response.xpath(
                 "/html//div[@id='job-view-enterprise']//div[@class='title-info']/h1/text()").extract_first().strip()
             item['salary'] = response.xpath(
                 "/html//p[@class='job-item-title']/text()").extract_first().strip()
@@ -72,12 +72,12 @@ class JobDetailSpider(scrapy.Spider):
         one_hunter_job = "/html/body/div[@id='job-hunter']"
         if response.xpath(one_hunter_job):
             item = LiepinItem()
-            jobnameraw=response.xpath(
+            job_nameraw=response.xpath(
                 "/html/body/div[@id='job-hunter']/div[@class='wrap clearfix']/div[@class='clearfix content']/div[@class='main ']/div[@class='about-position']/div[@class='title']/div[@class='title-info']/h1/text()").extract_first()
-            if jobnameraw is None:
-                jobnameraw = response.xpath(
+            if job_nameraw is None:
+                job_nameraw = response.xpath(
                     "/html/body/div[@id='job-hunter']/div[@class='wrap clearfix']/div[@class='clearfix content']/div[@class='main']/div[@class='about-position']/div[@class='title']/div[@class='title-info ']/h1/text()").extract_first()
-            item['jobname'] = jobnameraw.strip()
+            item['job_name'] = job_nameraw.strip()
             item['salary'] = response.xpath(
                 "/html/body/div[@id='job-hunter']//"
                 "p[@class='job-main-title']/text()").extract_first().strip()

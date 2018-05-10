@@ -8,9 +8,8 @@ if (typeof (salary) != "undefined" ){
     $("#display").ready(function(){delete salary;});
 }
 if (typeof (lan) != "undefined" ){
-    var title = "语言热度";
-    var desc = ['java','c++', 'python', 'javascript', 'php', 'c#', 'sql',  'android', 'ios', 'web'];
-    showPie(title, desc, lan);
+    var title = "技能热度";
+    showPie(title, lan);
     $("#display").ready(function(){delete lan;});
 }
 
@@ -23,8 +22,7 @@ if (typeof (education) != "undefined" ){
 
 if (typeof (experience) != "undefined"){
     var title = "经验需求分布";
-    var desc = ['1-3年', '3-5年',  '5-8年', '8-10年', '不限'];
-    showPie(title, desc, experience);
+    showPie(title, experience);
     $("#display").ready(function(){delete experience;});
 }
 

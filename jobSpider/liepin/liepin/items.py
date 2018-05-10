@@ -13,7 +13,7 @@ class LiepinItem(scrapy.Item):
     # name = scrapy.Field()
     id = scrapy.Field()
     link = scrapy.Field()
-    jobname = scrapy.Field()
+    job_name = scrapy.Field()
     salary = scrapy.Field()
     salary_min = scrapy.Field()
     salary_max = scrapy.Field()
@@ -23,4 +23,6 @@ class LiepinItem(scrapy.Item):
     experience = scrapy.Field()
     company_name = scrapy.Field()
     company_size = scrapy.Field()
+    job_require_keyword = scrapy.Field()
+    job_require_skill = scrapy.Field()
     pass

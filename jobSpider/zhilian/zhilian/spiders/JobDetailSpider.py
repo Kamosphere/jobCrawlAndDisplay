@@ -14,6 +14,7 @@ fp = os.path.abspath(os.path.dirname(
 zhilian_config.read(fp, encoding="utf-8")
 keyword = urllib.parse.quote(zhilian_config.get('search', 'keyword'))
 
+
 class JobDetailSpider(Spider):
     name = 'zhilian'
     allowed_domains = ['www.zhaopin.com']
@@ -34,7 +35,7 @@ class JobDetailSpider(Spider):
         salary = soup.select("table.newlist > tr > td.zwyx")
         for name, salary in zip(job_name, salary):
             item = ZhilianItem()
-            item["jobname"] = name.get_text()
+            item["job_name"] = name.get_text()
             url = name.get('href')
             item["salary"] = salary.get_text()
         yield Request(url=url, meta={"item": item}, callback=self.parse_moive, dont_filter=True)

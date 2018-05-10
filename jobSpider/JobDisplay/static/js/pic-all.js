@@ -128,7 +128,7 @@ function showChinaMap(){
 }
 
 //饼状图
-function showPie(title, desc, data){
+function showPie(title, data){
 	$(document).ready(function(){
 		var myChart = echarts.init(document.getElementById('display'));
 		option = {
@@ -139,11 +139,6 @@ function showPie(title, desc, data){
 			tooltip : {
 				trigger: 'item',
 				formatter: "{a} <br/>{b} : {c} ({d}%)"
-			},
-			legend: {
-				orient: 'vertical',
-				left: 'left',
-				data: desc,
 			},
 			series : [
 				{

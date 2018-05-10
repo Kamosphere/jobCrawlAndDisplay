@@ -8,14 +8,38 @@ import pymysql
 import re
 import hashlib
 from zhilian import settings
+import os
+fp_keyword = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../keyword.txt')
+fp_skill = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../skill.txt')
 
 
 class TransFormItemPipeline(object):
+    def fileInput(self, filenames):
+        myfile = open(filenames)
+        filelines = myfile.readlines()
+        lines = len(filelines)
+        dicts = {}
+        for line in filelines:
+            line = line.strip('\n')
+            dicts[line] = '0' * (len(dicts)) + '1' + '0' * (lines - 1 - len(dicts))
+        return dicts
+
+    def __init__(self, ):
+        self.dict_keyword = self.fileInput(fp_keyword)
+        self.dict_skill = self.fileInput(fp_skill)
+
     def process_item(self, item, spider):
-        self.transForm(item)
+        self.transform_education(item)
+        self.transform_experience(item)
+        self.transfrom_id(item)
+        self.transfrom_salary(item)
+        self.transform_companysize(item)
+        self.transform_education(item)
+        self.transform_dictdata(item, self.dict_keyword, 1)
+        self.transform_dictdata(item, self.dict_skill, 2)
         return item
 
-    def transForm(self, item):
+    def transform_education(self, item):
         if '大专' in item['education']:
             item['education'] = '大专'
         elif '本科' in item['education']:
@@ -27,6 +51,32 @@ class TransFormItemPipeline(object):
         else:
             item['education'] = '不限'
 
+    def transform_experience(self, item):
+        pattern = re.compile('\d+')
+        findyear = pattern.search(item['experience'])
+        if findyear:
+            item['experience'] = findyear.group()
+        else:
+            item['experience'] = '不限'
+
+    def transfrom_id(self, item):
+        idline = (item['job_name'] + item['company_name']).encode()
+        item['id'] = hashlib.sha256(idline).hexdigest()
+
+    def transfrom_salary(self, item):
+        ptn_str = u'(\d+)-(\d+)'
+        ptn = re.compile(ptn_str)
+        if ptn.match(item['salary']):
+            gg = ptn.search(item['salary'])
+            item['salary_min'] = round(float(gg.group(1)) * 12 / 10000, 2)
+            item['salary_max'] = round(float(gg.group(2)) * 12 / 10000, 2)
+        else:
+            item['salary_min'] = 0
+            item['salary_max'] = 0
+        item['salary'] = round(
+            float(item['salary_min']) + ((float(item['salary_max'])) - (float(item['salary_min'])) * 0.5))
+
+    def transform_companysize(self, item):
         if '20人以下' in item['company_size']\
                 or '20-99人' in item['company_size']:
             item['company_size'] = '1-99'
@@ -41,27 +91,16 @@ class TransFormItemPipeline(object):
         else:
             item['company_size'] = '保密'
 
-        pattern = re.compile('\d+')
-        findyear = pattern.search(item['experience'])
-        if findyear:
-            item['experience'] = findyear.group()
-        else:
-            item['experience'] = '不限'
-
-        idline = (item['jobname'] + item['company_name']).encode()
-        item['id'] = hashlib.sha256(idline).hexdigest()
-
-        ptn_str = u'(\d+)-(\d+)'
-        ptn = re.compile(ptn_str)
-        if ptn.match(item['salary']):
-            gg = ptn.search(item['salary'])
-            item['salary_min'] = round(float(gg.group(1))*12/10000,2)
-            item['salary_max'] = round(float(gg.group(2))*12/10000,2)
-        else:
-            item['salary_min'] = 0
-            item['salary_max'] = 0
-        item['salary'] = round(
-            float(item['salary_min']) + ((float(item['salary_max'])) - (float(item['salary_min'])) * 0.5))
+    def transform_dictdata(self, item, dicts, flag):
+        binput = 0
+        for key, value in dicts.items():
+            if key in item['job_require']:
+                binput = binput | int(value, 2)
+        boutput = str(bin(binput)[2:])
+        if flag == 1:
+            item['job_require_keyword'] = boutput
+        elif flag == 2:
+            item['job_require_skill'] = boutput
 
 
 class ZhilianPipeline(object):
@@ -80,13 +119,15 @@ class ZhilianPipeline(object):
         return item
 
     def insertData(self, item):
-        sql1 = "insert into app_hireinfo(id,link,jobname,salary,company_name,job_require,address,experience,education,salary_min,salary_max) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        sql1 = "insert into app_hireinfo(id,link,job_name,salary,company_name,job_require,address," \
+               "experience,education,salary_min,salary_max,job_require_keyword,job_require_skill) " \
+               "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
         params1 = (
-            item['id'], item['link'], item['jobname'], item['salary'], item['company_name'], item['job_require'],
-            item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'])
+            item['id'], item['link'], item['job_name'], item['salary'], item['company_name'], item['job_require'],
+            item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'],
+            item['job_require_keyword'], item['job_require_skill'])
         self.cursor.execute(sql1, params1)
         sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
         params2 = (item['company_name'], item['company_size'])
         self.cursor.execute(sql2, params2)
         self.conn.commit()
-

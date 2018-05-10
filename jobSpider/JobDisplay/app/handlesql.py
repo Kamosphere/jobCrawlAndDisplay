@@ -3,15 +3,21 @@ from django.db import connection, transaction
 from .models import hireinfo, companyinfo
 import json
 import re
+import os
+fp_keyword = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../keyword.txt')
+fp_skill = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../skill.txt')
 
 
-def fileInput(filename):
-    myfile = open(filename)
-    lines = len(myfile.readlines())
+def fileInput(filenames):
+    myfile = open(filenames)
+    filelines = myfile.readlines()
+    lines = len(filelines)
     dicts = {}
-    for line in myfile:
-        dicts[line] = "0"*(len(dicts))+"1"+"0"*(lines-len(dicts))
+    for line in filelines:
+        line = line.strip('\n')
+        dicts[line] = '0' * (len(dicts)) + '1' + '0' * (lines - 1 - len(dicts))
     return dicts
+
 
 # sql与django ORM混用
 class SqlHelper(object):
@@ -53,22 +59,42 @@ class SqlHelper(object):
     def executeGroupYear(self, args_list):
         def executeYear(args):
             if len(args) > 1:
-                sql = "select count(jobname) from app_hireinfo where experience >= %s and experience <= %s" % (
+                sql = "select count(job_name) from app_hireinfo where experience >= %s and experience <= %s" % (
                     args[0], args[1])
             else:
-                sql = "select count(jobname) from app_hireinfo where experience like '%%%s%%'" % args[0]
+                sql = "select count(job_name) from app_hireinfo where experience like '%%%s%%'" % args[0]
             return self.executeSql(sql)
         lc = []
         for i in args_list:
             lc.append({"value": self.tupleToOther(executeYear(i)), "name": i})
         return lc
 
-    # 关键字查询情况
-    def executeAsk(self, args):
+    # 语言查询情况
+    def executeLan(self, dicts):
         result_list = []
-        for arg in args:
-            lc = hireinfo.objects.filter(job_require__icontains=arg).count()
-            result_list.append({"value": lc, "name": arg})
+        lan_dict = hireinfo.objects.values("job_require_skill")
+        lan_list = list(lan_dict)
+        for key in dicts:
+            numbers = 0
+            for lan in lan_list:
+                mark = int(lan.get("job_require_skill"), 2) & int(dicts.get(key), 2)
+                if mark == int(dicts.get(key), 2):
+                    numbers = numbers + 1
+            result_list.append({"value": numbers, "name": key})
+        return result_list
+
+    # 关键字查询情况
+    def executeKeyWords(self, dicts):
+        result_list = []
+        lan_dict = hireinfo.objects.values("job_require_keyword")
+        lan_list = list(lan_dict)
+        for key in dicts:
+            numbers = 0
+            for lan in lan_list:
+                mark = int(lan.get("job_require_keyword"), 2) & int(dicts.get(key), 2)
+                if mark == int(dicts.get(key), 2):
+                    numbers = numbers + 1
+            result_list.append({"value": numbers, "name": key})
         return result_list
 
     # 城市查询情况
@@ -102,14 +128,11 @@ class BaseOnSqlHelper(object):
         self.sqlHelper = SqlHelper()
         # flag = 0（有上限有下限） flag=1(上限) flag=2(下限 ) flag=3(面议)
         self.salary = [[0, 0.1, 5], [0, 5, 10], [0, 10, 15], [0, 15, 20], [0, 20, 25], [0, 25, 30], [0, 30, 35], [0, 35, 40],  [2, 40], [3]]
-        self.lan = ['java', 'c++', 'python', 'javascript', 'php', 'c#',  'android', 'ios', 'web']
+        self.lan = fileInput(fp_skill)
         self.app_citys = ['武汉', '广州', '北京', '深圳', '上海', '天津', '重庆', '石家庄', '沈阳', '哈尔滨', '杭州',
                           '福州', '济南', '成都', '昆明', '兰州', '南宁', '银川', '长春', '南京', '合肥', '南昌',
                           '郑州', '长沙', '海口', '贵阳', '西安', '呼和浩特', '拉萨', '乌鲁木齐']
-        self.keyWords = ['人工智能', '大数据', '云计算', '物联网', '数据挖掘', '机器学习', '区块链', '算法', '嵌入式',
-                         '态度认真', '责任', '执行力', '吃苦耐劳', '团队', '进取心', '管理能力', '沟通', '协调',
-                         '压力', '测试', '硬件', '安全', '架构', '高并发', '多线程', '分布式', '核心'
-                         ]
+        self.keyWords = fileInput(fp_keyword)
         self.education = ['不限', '大专',  '本科', '硕士', '博士']
         self.experience = [[1, 3], [3, 5], [5, 8], [8, 10], ['不限']]
         self.companysize = ['1-99', '100-499', '500-999', '1000-9999', '10000+', '保密']
@@ -124,7 +147,7 @@ class BaseOnSqlHelper(object):
 
     # 拿到语言值
     def getLan(self):
-        return self.sqlHelper.executeAsk(self.lan)
+        return self.sqlHelper.executeLan(self.lan)
 
     # 拿到城市值
     def getCity(self):
@@ -132,7 +155,7 @@ class BaseOnSqlHelper(object):
 
     # 拿到关键字
     def getKeyWords(self):
-        return self.sqlHelper.executeAsk(self.keyWords)
+        return self.sqlHelper.executeKeyWords(self.keyWords)
 
     # 拿到教育情况
     def getEducation(self):
@@ -146,10 +169,10 @@ class BaseOnSqlHelper(object):
     def getSearchData(self,key):
         # 一次查询限制返回500条
         result_list = []
-        keys = ['link', 'jobname', 'salary_min', 'salary_max', 'company_name', 'address', 'education', 'experience']
-        result_query = hireinfo.objects.filter(jobname__icontains=key.lower()).order_by('-jobname')[:500]
+        keys = ['link', 'job_name', 'salary_min', 'salary_max', 'company_name', 'address', 'education', 'experience']
+        result_query = hireinfo.objects.filter(job_name__icontains=key.lower()).order_by('-job_name')[:500]
         for rst in result_query:
-            result_list.append({keys[0]: rst.link, keys[1]: rst.jobname, keys[2]: rst.salary_min, keys[3]: rst.salary_max,
+            result_list.append({keys[0]: rst.link, keys[1]: rst.job_name, keys[2]: rst.salary_min, keys[3]: rst.salary_max,
                                 keys[4]: rst.company_name, keys[5]: rst.address, keys[6]: rst.education, keys[7]: rst.experience})
         return result_list
 
@@ -189,7 +212,7 @@ class BaseOnSqlHelper(object):
         if len(app_citys) < 1:
             app_citys = ['北京', '上海', '广州', '深圳']
         for city in app_citys:
-            lc = hireinfo.objects.filter(jobname__icontains=key.lower(), address__icontains=city).count()
+            lc = hireinfo.objects.filter(job_name__icontains=key.lower(), address__icontains=city).count()
             result_list.append(lc)
         best_city = app_citys[result_list.index(max(result_list))]
         return json.dumps(self.city_list_dict(result_list, app_citys)), best_city, value
