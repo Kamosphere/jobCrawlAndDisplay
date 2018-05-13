@@ -145,8 +145,8 @@ class LiepinPipeline(object):
             item['id'], item['link'], item['job_name'], item['salary'], item['company_name'], item['job_require'],
             item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'],
             item['job_require_keyword'], item['job_require_skill'])
-        self.cursor.execute(sql1, params1)
         sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
         params2 = (item['company_name'], item['company_size'])
+        self.cursor.execute(sql1, params1)
         self.cursor.execute(sql2, params2)
         self.conn.commit()
