@@ -29,8 +29,8 @@ class JobDetailSpider(Spider):
             yield Request(url, self.parse)
 
     def parse(self, response):
-        wbdata = response.text
-        soup = BeautifulSoup(wbdata, 'lxml')
+        web_data = response.text
+        soup = BeautifulSoup(web_data, 'lxml')
         job_name = soup.select("table.newlist > tr > td.zwmc > div > a:nth-of-type(1)")
         salary = soup.select("table.newlist > tr > td.zwyx")
         for name, salary in zip(job_name, salary):

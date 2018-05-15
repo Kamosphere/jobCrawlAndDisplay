@@ -8,12 +8,12 @@ fp_keyword = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../.
 fp_skill = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../skill.txt')
 
 
-def fileInput(filenames):
-    myfile = open(filenames)
-    filelines = myfile.readlines()
-    lines = len(filelines)
+def fileInput(file_name):
+    input_file = open(file_name)
+    file_lines = input_file.readlines()
+    lines = len(file_lines)
     dicts = {}
-    for line in filelines:
+    for line in file_lines:
         line = line.strip('\n')
         dicts[line] = '0' * (len(dicts)) + '1' + '0' * (lines - 1 - len(dicts))
     return dicts

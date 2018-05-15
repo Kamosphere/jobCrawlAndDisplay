@@ -7,13 +7,15 @@
 
 
 from bs4 import BeautifulSoup as bs
-from liepin import settings
+from twisted.enterprise import adbapi
 import re
 import pymysql
 import hashlib
 import os
+import copy
 fp_keyword = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../keyword.txt')
 fp_skill = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../../skill.txt')
+
 
 class HtmlTagRemovePipeline(object):
     def process_item(self, item, spider):
@@ -27,12 +29,12 @@ class HtmlTagRemovePipeline(object):
 
 
 class TransFormItemPipeline(object):
-    def fileInput(self, filenames):
-        myfile = open(filenames)
-        filelines = myfile.readlines()
-        lines = len(filelines)
+    def fileInput(self, file_name):
+        input_file = open(file_name)
+        file_lines = input_file.readlines()
+        lines = len(file_lines)
         dicts = {}
-        for line in filelines:
+        for line in file_lines:
             line = line.strip('\n')
             dicts[line] = '0' * (len(dicts)) + '1' + '0' * (lines - 1 - len(dicts))
         return dicts
@@ -66,15 +68,15 @@ class TransFormItemPipeline(object):
 
     def transform_experience(self, item):
         pattern = re.compile('\d+')
-        findyear = pattern.search(item['experience'])
-        if findyear:
-            item['experience'] = findyear.group()
+        find_year = pattern.search(item['experience'])
+        if find_year:
+            item['experience'] = find_year.group()
         else:
             item['experience'] = '不限'
 
     def transfrom_id(self, item):
-        idline = (item['job_name'] + item['company_name']).encode()
-        item['id'] = hashlib.sha256(idline).hexdigest()
+        id_line = (item['job_name'] + item['company_name']).encode()
+        item['id'] = hashlib.sha256(id_line).hexdigest()
 
     def transfrom_salary(self, item):
         ptn_str = u'(\d+)-(\d+)万'
@@ -115,38 +117,56 @@ class TransFormItemPipeline(object):
         for key, value in dicts.items():
             if key in item['job_require']:
                 binput = binput | int(value, 2)
-        boutput = str(bin(binput)[2:])
+        bin_output = str(bin(binput)[2:])
         if flag == 1:
-            item['job_require_keyword'] = boutput
+            item['job_require_keyword'] = bin_output
         elif flag == 2:
-            item['job_require_skill'] = boutput
+            item['job_require_skill'] = bin_output
 
 
 class LiepinPipeline(object):
-    def __init__(self, ):
-        self.conn = pymysql.connect(
-            host=settings.MYSQL_HOST,
-            db=settings.MYSQL_DBNAME,
-            user=settings.MYSQL_USER,
-            passwd=settings.MYSQL_PASSWORD,
-            charset='utf8',  # 编码要加上，否则可能出现中文乱码问题
-            use_unicode=False)
-        self.cursor = self.conn.cursor()
+    def __init__(self, db_pool):
+        self.db_pool = db_pool
+
+    @classmethod
+    def from_settings(cls, settings):
+        db_params = dict(
+            host=settings["MYSQL_HOST"],
+            db=settings["MYSQL_DBNAME"],
+            user=settings["MYSQL_USER"],
+            passwd=settings["MYSQL_PASSWORD"],
+            charset='utf8',
+            cursorclass=pymysql.cursors.DictCursor,
+            use_unicode=False,
+        )
+        db_pool = adbapi.ConnectionPool("pymysql", **db_params)
+        return cls(db_pool)
 
     def process_item(self, item, spider):
-        self.insertData(item)
-        return item
+        # 使用twisted将mysql插入变成异步执行
+        async_item = copy.deepcopy(item)
+        query_job = self.db_pool.runInteraction(self.insertjobData, async_item)
+        query_job.addErrback(self.handle_error, item, spider)  # 处理异常
+        query_company = self.db_pool.runInteraction(self.insertcompanyData, async_item)
+        query_company.addErrback(self.handle_error, item, spider)  # 处理异常
 
-    def insertData(self, item):
-        sql1 = "insert into app_hireinfo(id,link,job_name,salary,company_name,job_require,address," \
+    def handle_error(self, failure, item, spider):
+        # 处理异步插入的异常
+        print(failure)
+
+    def insertjobData(self, cursor, item):
+        sql = "insert into app_hireinfo(id,link,job_name,salary,company_name,job_require,address," \
                "experience,education,salary_min,salary_max,job_require_keyword,job_require_skill) " \
                "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-        params1 = (
+        params = (
             item['id'], item['link'], item['job_name'], item['salary'], item['company_name'], item['job_require'],
             item['address'], item['experience'], item['education'], item['salary_min'], item['salary_max'],
             item['job_require_keyword'], item['job_require_skill'])
-        sql2 = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
-        params2 = (item['company_name'], item['company_size'])
-        self.cursor.execute(sql1, params1)
-        self.cursor.execute(sql2, params2)
-        self.conn.commit()
+        cursor.execute(sql, params)
+
+    def insertcompanyData(self, cursor, item):
+        sql = "insert into app_companyinfo(company_name,company_size) VALUES(%s,%s);"
+        params = (item['company_name'], item['company_size'])
+        cursor.execute(sql, params)
+
+
