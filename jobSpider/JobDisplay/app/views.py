@@ -13,7 +13,7 @@ helper = BaseOnSqlHelper()
 
 
 # 转换不能传输到html中的字符
-def urlreplace(input_key):
+def url_replace(input_key):
     keyword = input_key
     keyword = keyword.replace('+', '%2B')
     keyword = keyword.replace('#', '%23')
@@ -76,7 +76,7 @@ def search(request):
     except EmptyPage:
         result = paginator.page(paginator.num_pages)
     ctx['result'] = result
-    ctx['keyword'] = urlreplace(keyword)
+    ctx['keyword'] = url_replace(keyword)
     return render(request, 'search.html', ctx)
 
 
